@@ -1,0 +1,53 @@
+{{ $currentPost := . }}
+
+<!-- Extract tags of the current post -->
+{{ $currentTags := $currentPost.Params.tags }}
+
+<!-- Query all posts for those with matching tags -->
+{{ $related := slice }}
+
+{{ range where .Site.RegularPages "Type" "post" }}
+{{ $postTags := .Params.tags }}
+{{ $intersection := intersect $currentTags $postTags }}
+{{ if gt (len $intersection) 0 }}
+{{ if ne .Permalink $currentPost.Permalink }} <!-- Exclude current post from related posts -->
+{{ $related = $related | append . }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ if gt (len $related) 0 }}
+
+<h2>Related Articles</h2>
+
+{{ range $related }}
+<article class="flex flex-col gap-5">
+  <h5>
+    <a href="{{ .Permalink }}">{{ .Title }}</a>
+  </h5>
+  <!-- <span class="date">
+        <time datetime="{{ .PublishDate }}" title='{{ .PublishDate.Format "Mon, Jan 2, 2006, 3:04 PM MST" }}'>
+          {{ .PublishDate.Format "Monday, January 2, 2006" }}
+        </time>
+      </span> -->
+
+  <div class="description">
+    {{ if .Params.description }}
+    {{ .Params.description }}
+    {{ else if .Summary }}
+    {{ .Summary }}
+    {{ end }}
+  </div>
+
+  <div class="mt-2">
+    <a class="read-more" href="{{ .Permalink }}">
+      {{ i18n "readMore" }}
+      <span class="w-4 h-4 stroke-2">
+        {{ partial "utils/icon" "arrow-right" }}
+      </span>
+    </a>
+  </div>
+  <ul>
+
+</article>
+{{ end }}
+{{end}}
